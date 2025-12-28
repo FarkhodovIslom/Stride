@@ -38,13 +38,13 @@
     --background: #0a0a0a;
     --foreground: #ededed;
     --card: #171717;
-    --card-foreground: #ededed;
+    --card-foreground: #f4f0f0;
     --primary: #facc15;
     --primary-foreground: #171717;
     --secondary: #262626;
     --secondary-foreground: #ededed;
     --muted: #262626;
-    --muted-foreground: #a3a3a3;
+    --muted-foreground: #dadada;
     --accent: #262626;
     --accent-foreground: #ededed;
     --destructive: #dc2626;

@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
+import { BookOpen, BarChart3, Flame, ClipboardList } from "lucide-react";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -14,7 +15,7 @@ export default async function Home() {
     <main className="min-h-screen flex flex-col items-center justify-center bg-[var(--background)] px-4">
       <div className="text-center max-w-2xl">
         <div className="mb-8">
-          <span className="text-5xl">📚</span>
+          <BookOpen className="w-16 h-16 text-primary-400" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-[var(--foreground)] mb-4">
           Welcome to <span className="text-primary-400">Stride</span>
@@ -41,7 +42,9 @@ export default async function Home() {
 
       <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl">
         <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)]">
-          <div className="text-3xl mb-3">📊</div>
+          <div className="w-8 h-8 mb-3 text-primary-400">
+            <BarChart3 className="w-full h-full" />
+          </div>
           <h3 className="font-semibold text-[var(--foreground)] mb-2">
             Track Progress
           </h3>
@@ -50,7 +53,9 @@ export default async function Home() {
           </p>
         </div>
         <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)]">
-          <div className="text-3xl mb-3">🔥</div>
+          <div className="w-8 h-8 mb-3 text-orange-500">
+            <Flame className="w-full h-full" />
+          </div>
           <h3 className="font-semibold text-[var(--foreground)] mb-2">
             Build Streaks
           </h3>
@@ -59,7 +64,9 @@ export default async function Home() {
           </p>
         </div>
         <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--card)]">
-          <div className="text-3xl mb-3">📋</div>
+          <div className="w-8 h-8 mb-3 text-blue-500">
+            <ClipboardList className="w-full h-full" />
+          </div>
           <h3 className="font-semibold text-[var(--foreground)] mb-2">
             Kanban Board
           </h3>

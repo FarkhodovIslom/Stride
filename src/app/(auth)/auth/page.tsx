@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Card } from "@/components/ui";
 import Link from "next/link";
+import { BookOpen } from "lucide-react";
 
 type AuthMode = "login" | "register";
 
@@ -86,7 +87,7 @@ export default function AuthPage() {
       <Card className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block">
-            <span className="text-4xl">📚</span>
+            <BookOpen className="w-10 h-10 text-primary-400" />
           </Link>
           <h1 className="text-2xl font-bold text-[var(--foreground)] mt-4">
             {mode === "login" ? "Welcome back" : "Create your account"}

@@ -9,6 +9,7 @@ import TodayTasks from "@/components/dashboard/TodayTasks";
 import ProgressChart from "@/components/dashboard/ProgressChart";
 import { getGreeting } from "@/lib/utils";
 import type { DashboardStats } from "@/types";
+import { BookOpen, FileText, CheckCircle } from "lucide-react";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -90,17 +91,17 @@ export default function DashboardPage() {
             <StatsCard
               title="Total Courses"
               value={stats.totalCourses}
-              icon={<span>📚</span>}
+              icon={<BookOpen className="w-6 h-6" />}
             />
             <StatsCard
               title="Total Lessons"
               value={stats.totalLessons}
-              icon={<span>📝</span>}
+              icon={<FileText className="w-6 h-6" />}
             />
             <StatsCard
               title="Completed"
               value={stats.completedLessons}
-              icon={<span>✅</span>}
+              icon={<CheckCircle className="w-6 h-6" />}
               subtitle={`${stats.progressPercentage}% complete`}
             />
             <StreakDisplay streak={stats.streak} />

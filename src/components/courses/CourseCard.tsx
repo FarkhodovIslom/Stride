@@ -47,7 +47,7 @@ export default function CourseCard({ course, onEdit, onDelete }: CourseCardProps
       </Link>
 
       {/* Actions */}
-      <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-2 right-2 flex bg-[var(--background)] rounded-sm gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={(e) => {
             e.preventDefault();

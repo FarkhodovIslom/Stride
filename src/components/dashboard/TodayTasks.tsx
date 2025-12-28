@@ -3,6 +3,7 @@
 import { Card, EmptyState, Checkbox } from "@/components/ui";
 import type { Lesson } from "@/types";
 import Link from "next/link";
+import { CheckCircle } from "lucide-react";
 
 interface TodayTasksProps {
   tasks: Lesson[];
@@ -17,7 +18,7 @@ export default function TodayTasks({ tasks, onToggleComplete }: TodayTasksProps)
           Today&apos;s Tasks
         </h3>
         <EmptyState
-          icon={<span className="text-4xl">✅</span>}
+          icon={<CheckCircle className="w-10 h-10 text-green-500" />}
           title="All caught up!"
           description="You have no pending tasks. Add new lessons to continue learning."
         />

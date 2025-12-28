@@ -11,6 +11,7 @@ import DeleteConfirmModal from "@/components/courses/DeleteConfirmModal";
 import { useLessonsStore } from "@/store/useLessonsStore";
 import { calculateProgress } from "@/lib/utils";
 import type { Course, LessonStatus } from "@/types";
+import { Search, FileText } from "lucide-react";
 
 interface CoursePageProps {
   params: Promise<{ id: string }>;
@@ -108,7 +109,7 @@ export default function CoursePage({ params }: CoursePageProps) {
   if (!course) {
     return (
       <EmptyState
-        icon={<span className="text-5xl">🔍</span>}
+        icon={<Search className="w-16 h-16 text-muted-foreground" />}
         title="Course not found"
         description="The course you're looking for doesn't exist or has been deleted."
         action={{
@@ -198,7 +199,7 @@ export default function CoursePage({ params }: CoursePageProps) {
       {/* Kanban Board */}
       {courseLessons.length === 0 ? (
         <EmptyState
-          icon={<span className="text-5xl">📝</span>}
+          icon={<FileText className="w-16 h-16 text-primary-400" />}
           title="No lessons yet"
           description="Add your first lesson to start organizing your learning."
         />

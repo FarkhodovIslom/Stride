@@ -7,6 +7,7 @@ import CourseForm from "@/components/courses/CourseForm";
 import DeleteConfirmModal from "@/components/courses/DeleteConfirmModal";
 import { useCoursesStore } from "@/store/useCoursesStore";
 import type { Course } from "@/types";
+import { BookOpen } from "lucide-react";
 
 export default function CoursesPage() {
   const { courses, isLoading, fetchCourses, addCourse, updateCourse, deleteCourse } =
@@ -75,7 +76,7 @@ export default function CoursesPage() {
         </div>
       ) : courses.length === 0 ? (
         <EmptyState
-          icon={<span className="text-5xl">📚</span>}
+          icon={<BookOpen className="w-16 h-16 text-primary-400" />}
           title="No courses yet"
           description="Create your first course to start tracking your learning progress."
           action={{

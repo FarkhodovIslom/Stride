@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui";
+import { Flame } from "lucide-react";
 
 interface StreakDisplayProps {
   streak: number;
@@ -18,7 +19,9 @@ export default function StreakDisplay({ streak }: StreakDisplayProps) {
   return (
     <Card className="relative overflow-hidden bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/20">
       <div className="flex items-center gap-4">
-        <div className="text-5xl">🔥</div>
+        <div className="w-16 h-16 text-orange-500">
+          <Flame className="w-full h-full" />
+        </div>
         <div>
           <p className="text-sm text-[var(--muted-foreground)]">
             Learning Streak
