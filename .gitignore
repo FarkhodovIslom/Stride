@@ -1,21 +1,25 @@
 # dependencies
-/node_modules
+node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
+dist/
+.env
+*.log
+.DS_Store
+
 
 # testing
 /coverage
 
 # next.js
-/.next/
+.next
 /out/
 
 # production
 /build
 
 # misc
-.DS_Store
 *.pem
 
 # debug
@@ -38,7 +42,8 @@ next-env.d.ts
 prisma/*.db
 prisma/*.db-journal
 
-# AI
+# AI agents
 .claude
+.cursor
 
 TODO.md
