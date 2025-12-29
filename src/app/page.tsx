@@ -14,8 +14,8 @@ export default async function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[var(--background)] px-4">
       <div className="text-center max-w-2xl">
-        <div className="mb-8">
-          <BookOpen className="w-16 h-16 text-primary-400" />
+        <div className="mb-3 d-flex justify-center">
+          <BookOpen className="w-12 h-12 text-primary-400 mx-auto" />
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-[var(--foreground)] mb-4">
           Welcome to <span className="text-primary-400">Stride</span>
