@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Backend API Server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: stride-backend-prod
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DATABASE_URL=file:/app/prisma/dev.db
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      - JWT_EXPIRES_IN=7d
+      - FRONTEND_URL=http://localhost:3000
+    networks:
+      - stride-network
+    depends_on:
+      - db
+
+  # Frontend Next.js Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: stride-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    networks:
+      - stride-network
+    depends_on:
+      - backend
+
+  # SQLite Database
+  db:
+    image: alpine:latest
+    container_name: stride-db-prod
+    restart: unless-stopped
+    volumes:
+      - db-data:/app
+    networks:
+      - stride-network
+
+networks:
+  stride-network:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
+

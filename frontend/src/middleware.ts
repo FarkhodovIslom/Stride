@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   // For protected routes, check if token exists
   // Note: This is a basic check. Full validation happens on the backend
   const token = request.cookies.get("token")?.value;
-  
+
   if (!token) {
     return NextResponse.redirect(new URL("/auth", request.url));
   }
