@@ -41,9 +41,11 @@ export const useAuthStore = create<AuthState>()(
             { email, password }
           );
 
-          // Save token to localStorage
+          // Save token to both localStorage and cookie
           if (typeof window !== "undefined") {
             localStorage.setItem("token", response.token);
+            // Set cookie for middleware (max age 30 days)
+            document.cookie = `token=${response.token}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
           }
 
           set({
@@ -71,9 +73,11 @@ export const useAuthStore = create<AuthState>()(
             { email, password, name }
           );
 
-          // Save token to localStorage
+          // Save token to both localStorage and cookie
           if (typeof window !== "undefined") {
             localStorage.setItem("token", response.token);
+            // Set cookie for middleware (max age 30 days)
+            document.cookie = `token=${response.token}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
           }
 
           set({
@@ -96,6 +100,8 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         if (typeof window !== "undefined") {
           localStorage.removeItem("token");
+          // Remove cookie
+          document.cookie = "token=; path=/; max-age=0";
         }
         set({
           user: null,

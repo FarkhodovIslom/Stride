@@ -45,6 +45,7 @@ class ApiClient {
     // Handle 401 Unauthorized
     if (response.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('token');
+      document.cookie = 'token=; path=/; max-age=0';
       window.location.href = '/auth';
       throw new Error('Unauthorized');
     }
