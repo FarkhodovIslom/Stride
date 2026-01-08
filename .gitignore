@@ -8,10 +8,6 @@ dist/
 *.log
 .DS_Store
 
-# backend
-backend/prisma/migrations
-backend/prisma/migrations/migration_lock.toml
-
 #IDE settings
 .idea
 .vscode

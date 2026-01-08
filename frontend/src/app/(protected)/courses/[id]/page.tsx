@@ -12,6 +12,7 @@ import { useLessonsStore } from "@/store/useLessonsStore";
 import { calculateProgress } from "@/lib/utils";
 import type { Course, LessonStatus } from "@/types";
 import { Search, FileText } from "lucide-react";
+import apiClient from "@/lib/api";
 
 interface CoursePageProps {
   params: Promise<{ id: string }>;
@@ -35,13 +36,8 @@ export default function CoursePage({ params }: CoursePageProps) {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await fetch(`/api/courses/${id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setCourse(data.course);
-        } else {
-          router.push("/courses");
-        }
+        const data = await apiClient.get<{ course: Course }>(`/courses/${id}`, true);
+        setCourse(data.course);
       } catch (error) {
         console.error("Failed to fetch course:", error);
         router.push("/courses");
@@ -71,23 +67,20 @@ export default function CoursePage({ params }: CoursePageProps) {
   };
 
   const handleEditCourse = async (data: { title: string; description: string }) => {
-    const response = await fetch(`/api/courses/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    if (response.ok) {
-      const { course: updatedCourse } = await response.json();
-      setCourse(updatedCourse);
+    try {
+      const result = await apiClient.put<{ course: Course }>(`/courses/${id}`, data, true);
+      setCourse(result.course);
+    } catch (error) {
+      console.error("Failed to update course:", error);
     }
   };
 
   const handleDeleteCourse = async () => {
-    const response = await fetch(`/api/courses/${id}`, {
-      method: "DELETE",
-    });
-    if (response.ok) {
+    try {
+      await apiClient.delete(`/courses/${id}`, true);
       router.push("/courses");
+    } catch (error) {
+      console.error("Failed to delete course:", error);
     }
   };
 
