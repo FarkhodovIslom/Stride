@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import './globals.css';
 import ThemeProvider from "@/components/providers/ThemeProvider";
+import QueryProvider from "@/components/providers/QueryProvider";
 import { ApiStatusProvider } from "@/components/ui/ApiStatusProvider";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
   title: "Stride - Learning Progress Dashboard",
@@ -16,10 +18,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <ApiStatusProvider>
-          <ThemeProvider>{children}</ThemeProvider>
-        </ApiStatusProvider>
+        <QueryProvider>
+          <ApiStatusProvider>
+            <ThemeProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </ThemeProvider>
+          </ApiStatusProvider>
+        </QueryProvider>
       </body>
     </html>
   );
 }
+

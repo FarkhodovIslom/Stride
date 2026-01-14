@@ -10,3 +10,6 @@ export { default as ServerWakeUp } from './ServerWakeUp';
 export { ErrorMessage } from './ErrorMessage';
 export { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 export { ApiStatusProvider, useApiStatus } from "./ApiStatusProvider";
+export { ErrorBoundary, DashboardErrorFallback } from './ErrorBoundary';
+export { ToastProvider, useToast } from './Toast';
+

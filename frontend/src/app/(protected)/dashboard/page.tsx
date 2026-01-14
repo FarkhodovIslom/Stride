@@ -1,105 +1,107 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { StatsSkeleton } from "@/components/ui";
+import { ErrorBoundary, DashboardErrorFallback } from "@/components/ui/ErrorBoundary";
 import StatsCard from "@/components/dashboard/StatsCard";
 import StreakDisplay from "@/components/dashboard/StreakDisplay";
 import TodayTasks from "@/components/dashboard/TodayTasks";
 import ProgressChart from "@/components/dashboard/ProgressChart";
 import { getGreeting } from "@/lib/utils";
-import type { DashboardStats } from "@/types";
-import { BookOpen, FileText, CheckCircle } from "lucide-react";
+import { BookOpen, FileText, CheckCircle, RefreshCw } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
-import apiClient from "@/lib/api";
+import { useDashboardStats, useCompleteLesson } from "@/hooks/useDashboard";
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user } = useAuthStore();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: stats, isLoading, error, refetch } = useDashboardStats();
+  const completeLesson = useCompleteLesson();
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const data = await apiClient.get<{ stats: DashboardStats }>("/dashboard/stats", true);
-        setStats(data.stats);
-      } catch (error) {
-        console.error("Failed to fetch dashboard stats:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
-  const handleToggleComplete = async (id: string, courseId: string) => {
-    // Optimistic update
-    if (stats) {
-      setStats({
-        ...stats,
-        todayTasks: stats.todayTasks.filter((t) => t.id !== id),
-        completedLessons: stats.completedLessons + 1,
-        progressPercentage:
-          stats.totalLessons > 0
-            ? Math.round(((stats.completedLessons + 1) / stats.totalLessons) * 100)
-            : 0,
-      });
-    }
-
-    try {
-      await apiClient.put(`/lessons/${id}`, { completed: true, status: "completed" }, true);
-    } catch (error) {
-      console.error("Failed to toggle lesson:", error);
-      // Revert on error - refetch stats
-      try {
-        const data = await apiClient.get<{ stats: DashboardStats }>("/dashboard/stats", true);
-        setStats(data.stats);
-      } catch (e) {
-        console.error("Failed to refetch stats:", e);
-      }
-    }
+  const handleToggleComplete = (id: string, _courseId: string) => {
+    if (completeLesson.isPending) return;
+    completeLesson.mutate(id);
   };
+
+  // Create a set of tasks being completed for the loading indicator
+  const completingTasks = new Set<string>(
+    completeLesson.isPending && completeLesson.variables
+      ? [completeLesson.variables]
+      : []
+  );
 
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
-          {getGreeting()}, {user?.name || "Learner"}!
-        </h1>
-        <p className="text-[var(--muted-foreground)] mt-1">
-          Here&apos;s your learning progress overview
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1
+            className="text-2xl font-bold text-[var(--foreground)]"
+            aria-label={`${getGreeting()}, ${user?.name || "Learner"}`}
+          >
+            {getGreeting()}, {user?.name || "Learner"}!
+          </h1>
+          <p className="text-[var(--muted-foreground)] mt-1">
+            Here&apos;s your learning progress overview
+          </p>
+        </div>
+        {stats && (
+          <button
+            onClick={() => refetch()}
+            className="p-2 rounded-lg hover:bg-[var(--muted)] transition-colors"
+            aria-label="Refresh dashboard data"
+            title="Refresh"
+          >
+            <RefreshCw className="w-5 h-5 text-[var(--muted-foreground)]" />
+          </button>
+        )}
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          role="status"
+          aria-label="Loading dashboard data"
+        >
           <StatsSkeleton />
           <StatsSkeleton />
           <StatsSkeleton />
           <StatsSkeleton />
         </div>
+      ) : error ? (
+        <DashboardErrorFallback
+          error={error as Error}
+          resetError={() => refetch()}
+        />
       ) : stats ? (
         <>
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+            role="region"
+            aria-label="Learning statistics"
+          >
             <StatsCard
               title="Total Courses"
               value={stats.totalCourses}
-              icon={<BookOpen className="w-6 h-6" />}
+              icon={<BookOpen className="w-6 h-6" aria-hidden="true" />}
+              aria-label={`Total courses: ${stats.totalCourses}`}
             />
             <StatsCard
               title="Total Lessons"
               value={stats.totalLessons}
-              icon={<FileText className="w-6 h-6" />}
+              icon={<FileText className="w-6 h-6" aria-hidden="true" />}
+              aria-label={`Total lessons: ${stats.totalLessons}`}
             />
             <StatsCard
               title="Completed"
               value={stats.completedLessons}
-              icon={<CheckCircle className="w-6 h-6" />}
+              icon={<CheckCircle className="w-6 h-6" aria-hidden="true" />}
               subtitle={`${stats.progressPercentage}% complete`}
+              aria-label={`Completed lessons: ${stats.completedLessons}, ${stats.progressPercentage}% complete`}
             />
-            <StreakDisplay streak={stats.streak} />
+            <StreakDisplay
+              streak={stats.streak}
+              aria-label={`Learning streak: ${stats.streak} days`}
+            />
           </div>
 
           {/* Charts and Tasks */}
@@ -111,14 +113,19 @@ export default function DashboardPage() {
             <TodayTasks
               tasks={stats.todayTasks}
               onToggleComplete={handleToggleComplete}
+              completingTasks={completingTasks}
             />
           </div>
         </>
-      ) : (
-        <div className="text-center py-12 text-[var(--muted-foreground)]">
-          Failed to load dashboard data
-        </div>
-      )}
+      ) : null}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ErrorBoundary>
+      <DashboardContent />
+    </ErrorBoundary>
   );
 }
