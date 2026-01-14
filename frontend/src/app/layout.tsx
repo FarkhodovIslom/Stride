@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import SessionProvider from "@/components/providers/SessionProvider";
 import ThemeProvider from "@/components/providers/ThemeProvider";
+import { ApiStatusProvider } from "@/components/ui/ApiStatusProvider";
 
 export const metadata: Metadata = {
   title: "Stride - Learning Progress Dashboard",
@@ -17,7 +18,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
         <SessionProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ApiStatusProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </ApiStatusProvider>
         </SessionProvider>
       </body>
     </html>
