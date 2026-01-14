@@ -20,10 +20,9 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+      - db-data:/app/prisma
     networks:
       - stride-network
-    depends_on:
-      - db
 
   # Frontend Next.js Application
   frontend:
@@ -45,16 +44,6 @@ services:
       - stride-network
     depends_on:
       - backend
-
-  # SQLite Database (for development)
-  db:
-    image: alpine:latest
-    container_name: stride-db
-    restart: unless-stopped
-    volumes:
-      - db-data:/app
-    networks:
-      - stride-network
 
 networks:
   stride-network:
