@@ -35,19 +35,28 @@ export class CoursesService {
             throw new Error('Course title is required');
         }
 
-        const course = await prisma.course.create({
-            data: {
-                title: title.trim(),
-                description: description?.trim() || null,
-                userId,
-            },
-            include: {
-                lessons: true,
-                _count: { select: { lessons: true } },
-            },
-        });
+        try {
+            const course = await prisma.course.create({
+                data: {
+                    title: title.trim(),
+                    description: description?.trim() || null,
+                    userId,
+                },
+                include: {
+                    lessons: true,
+                    _count: { select: { lessons: true } },
+                },
+            });
 
-        return course;
+            return course;
+        } catch (error: any) {
+            // Handle foreign key constraint violation
+            if (error.code === 'P2003') {
+                throw new Error('User not found. Please ensure you are authenticated with a valid account.');
+            }
+            // Re-throw other errors
+            throw error;
+        }
     }
 
     async updateCourse(

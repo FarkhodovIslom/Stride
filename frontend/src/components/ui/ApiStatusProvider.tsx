@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode, useRef } from "react";
 import ServerWakeUp from "./ServerWakeUp";
 import { useHealthCheck } from "@/hooks/useHealthCheck";
 
@@ -12,40 +12,45 @@ interface ApiStatusContextType {
 
 const ApiStatusContext = createContext<ApiStatusContextType | undefined>(undefined);
 
-// Cleanup function type
-type CleanupFunction = () => void;
-
 export function ApiStatusProvider({ children }: { children: ReactNode }) {
   const [showWakeUp, setShowWakeUp] = useState(false);
   const [pendingRequests, setPendingRequests] = useState(0);
   const { isServerAwake, checkServer } = useHealthCheck();
-  const checkIntervalRef = useCallbackRef<ReturnType<typeof setInterval> | null>(null);
+  const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isWakingUpRef = useRef(false);
 
   // Start wake-up sequence
   const startWakeUp = useCallback(async () => {
-    if (showWakeUp || isServerAwake) return;
-    
+    if (isWakingUpRef.current || isServerAwake) return;
+
+    isWakingUpRef.current = true;
     setShowWakeUp(true);
-    
+
     // Check server status periodically
     checkIntervalRef.current = setInterval(async () => {
-      const isAwake = await checkServer();
-      if (isAwake) {
-        if (checkIntervalRef.current) {
-          clearInterval(checkIntervalRef.current);
+      try {
+        const isAwake = await checkServer();
+        if (isAwake) {
+          if (checkIntervalRef.current) {
+            clearInterval(checkIntervalRef.current);
+            checkIntervalRef.current = null;
+          }
+          // Hide wake-up after a short delay for smooth transition
+          setTimeout(() => {
+            setShowWakeUp(false);
+            isWakingUpRef.current = false;
+          }, 500);
         }
-        // Hide wake-up after a short delay for smooth transition
-        setTimeout(() => {
-          setShowWakeUp(false);
-        }, 500);
+      } catch (error) {
+        console.error("Health check failed:", error);
       }
     }, 2000);
-  }, [showWakeUp, isServerAwake, checkServer, checkIntervalRef]);
+  }, [isServerAwake, checkServer]);
 
-  // Track pending API requests
+  // Track pending API requests - setup once on mount
   useEffect(() => {
     const originalFetch = window.fetch;
-    
+
     window.fetch = async (...args) => {
       // Skip non-API requests and health checks
       const url = args[0]?.toString() || "";
@@ -53,32 +58,32 @@ export function ApiStatusProvider({ children }: { children: ReactNode }) {
         return originalFetch(...args);
       }
 
-      // Show wake-up screen if server might be asleep
-      if (!isServerAwake && !showWakeUp) {
-        setShowWakeUp(true);
-      }
-
       setPendingRequests((prev) => prev + 1);
-      
+
       try {
         const response = await originalFetch(...args);
         return response;
       } finally {
-        setPendingRequests((prev) => {
-          const newCount = prev - 1;
-          // Hide wake-up when all requests complete and server is awake
-          if (newCount === 0 && isServerAwake) {
-            setTimeout(() => setShowWakeUp(false), 300);
-          }
-          return newCount;
-        });
+        setPendingRequests((prev) => prev - 1);
       }
     };
 
     return () => {
       window.fetch = originalFetch;
     };
-  }, [isServerAwake, showWakeUp]);
+  }, []); // Only setup once on mount
+
+  // Monitor server status and show wake-up if needed when requests are pending
+  useEffect(() => {
+    if (pendingRequests > 0 && !isServerAwake && !isWakingUpRef.current) {
+      setShowWakeUp(true);
+    }
+
+    // Hide wake-up when server is awake and no pending requests
+    if (pendingRequests === 0 && isServerAwake && showWakeUp) {
+      setTimeout(() => setShowWakeUp(false), 300);
+    }
+  }, [pendingRequests, isServerAwake, showWakeUp]);
 
   // Cleanup interval on unmount
   useEffect(() => {
@@ -89,14 +94,14 @@ export function ApiStatusProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Auto-wake on mount
+  // Auto-wake on mount - only once
   useEffect(() => {
     const wakeUpTimer = setTimeout(() => {
       startWakeUp();
     }, 500);
 
     return () => clearTimeout(wakeUpTimer);
-  }, [startWakeUp]);
+  }, []); // Empty deps - only run once on mount
 
   return (
     <ApiStatusContext.Provider
@@ -110,12 +115,6 @@ export function ApiStatusProvider({ children }: { children: ReactNode }) {
       {children}
     </ApiStatusContext.Provider>
   );
-}
-
-// Custom hook for refs with useCallback
-function useCallbackRef<T>(initialValue: T | null): React.MutableRefObject<T | null> {
-  const ref = useState(() => ({ current: initialValue }))[0];
-  return ref;
 }
 
 export function useApiStatus() {

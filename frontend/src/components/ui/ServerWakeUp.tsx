@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BookOpen, Sparkles, Target, Zap } from "lucide-react";
+import { BookOpen, Sparkles, Target, Zap, Brain } from "lucide-react";
 import { useEffect, useState } from "react";
 
 // Random motivational messages about learning
@@ -10,10 +10,36 @@ const motivationalMessages = [
   { icon: Sparkles, text: "Polishing your progress tracker..." },
   { icon: Target, text: "Setting up your goals..." },
   { icon: Zap, text: "Charging up your streak..." },
+  { icon: Brain, text: "Waking up the knowledge base..." },
 ];
 
 export default function ServerWakeUp() {
   const [messageIndex, setMessageIndex] = useState(0);
+  const [dimensions, setDimensions] = useState({ width: 1024, height: 768 });
+  const [particleCount, setParticleCount] = useState(6);
+
+  // Get window dimensions safely for SSR
+  useEffect(() => {
+    const updateDimensions = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      setDimensions({ width, height });
+
+      // Responsive particle count: fewer on mobile, more on desktop
+      if (width < 640) {
+        setParticleCount(3);
+      } else if (width < 1024) {
+        setParticleCount(5);
+      } else {
+        setParticleCount(8);
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
 
   useEffect(() => {
     // Cycle through messages every 2 seconds
@@ -32,13 +58,13 @@ export default function ServerWakeUp() {
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating particles */}
-        {[...Array(6)].map((_, i) => (
+        {[...Array(particleCount)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute opacity-10"
             initial={{
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
+              x: Math.random() * dimensions.width,
+              y: Math.random() * dimensions.height,
             }}
             animate={{
               y: [null, -100],
@@ -70,17 +96,25 @@ export default function ServerWakeUp() {
           }}
         >
           <div className="w-24 h-24 rounded-full border-4 border-[var(--border)] border-t-[var(--primary)] border-r-[var(--primary)] border-b-transparent border-l-transparent" />
-          
-          {/* Inner pulsing circle */}
+
+          {/* Inner pulsing circle - counter-rotates to stay upright */}
           <motion.div
             className="absolute inset-2 flex items-center justify-center"
             animate={{
               scale: [1, 1.1, 1],
+              rotate: -360, // Counter-rotate to keep icon upright
             }}
             transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
+              scale: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
+              rotate: {
+                duration: 8,
+                repeat: Infinity,
+                ease: "linear",
+              },
             }}
           >
             <div className="w-16 h-16 rounded-full bg-[var(--primary)]/10 flex items-center justify-center">
@@ -88,25 +122,6 @@ export default function ServerWakeUp() {
             </div>
           </motion.div>
         </motion.div>
-
-        {/* Progress Dots */}
-        <div className="flex gap-3 mt-8">
-          {[...Array(3)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="w-3 h-3 rounded-full bg-[var(--primary)]"
-              animate={{
-                opacity: [0.3, 1, 0.3],
-                scale: [0.8, 1, 0.8],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                delay: i * 0.2,
-              }}
-            />
-          ))}
-        </div>
 
         {/* Animated Message */}
         <motion.p
@@ -126,7 +141,7 @@ export default function ServerWakeUp() {
           animate={{ opacity: [0.5, 0.8, 0.5] }}
           transition={{ duration: 3, repeat: Infinity }}
         >
-          First requests take a moment • We're worth the wait
+          This might take a moment • We're worth the wait
         </motion.p>
       </div>
     </div>
