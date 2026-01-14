@@ -16,8 +16,14 @@ const PORT = process.env.PORT || 4000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Middleware
+const allowedOrigins = [
+  FRONTEND_URL,
+  'http://localhost:3000',
+  'https://tostride.netlify.app',
+];
+
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(express.json());
@@ -47,7 +53,7 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 CORS enabled for: ${FRONTEND_URL}`);
+  console.log(`🌐 CORS enabled for: ${allowedOrigins.join(', ')}`);
 });
 
 export default app;
