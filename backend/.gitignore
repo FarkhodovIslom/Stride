@@ -28,6 +28,7 @@ yarn-error.log*
 *.tsbuildinfo
 
 # prisma
+*.db
 prisma/*.db
 prisma/*.db-journal
 prisma/migrations/
