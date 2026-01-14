@@ -1,45 +1,34 @@
 import express, { Application } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes';
 import usersRoutes from './routes/users.routes';
 import coursesRoutes from './routes/courses.routes';
 import lessonsRoutes from './routes/lessons.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import { errorHandler } from './middleware/errorHandler';
-
-// Load environment variables
-dotenv.config();
+import config from './config';
 
 const app: Application = express();
-const PORT = process.env.PORT || 4000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // Middleware
-const allowedOrigins = [
-  FRONTEND_URL,
-  'http://localhost:3000',
-  'https://tostride.netlify.app'
-];
-
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
+  origin: config.cors.allowedOrigins,
+  credentials: config.cors.credentials,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check
-app.get('/api/health', (req, res) => {
+app.get(config.routes.health, (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
 
 // Routes
-app.use('/auth', authRoutes);
-app.use('/users', usersRoutes);
-app.use('/courses', coursesRoutes);
-app.use('/lessons', lessonsRoutes);
-app.use('/dashboard', dashboardRoutes);
+app.use(config.routes.auth, authRoutes);
+app.use(config.routes.users, usersRoutes);
+app.use(config.routes.courses, coursesRoutes);
+app.use(config.routes.lessons, lessonsRoutes);
+app.use(config.routes.dashboard, dashboardRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -50,10 +39,10 @@ app.use('*', (req, res) => {
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 CORS enabled for: ${allowedOrigins.join(', ')}`);
+app.listen(config.server.port, () => {
+  console.log(`🚀 Server is running on port ${config.server.port}`);
+  console.log(`📝 Environment: ${config.server.env}`);
+  console.log(`🌐 CORS enabled for: ${config.cors.allowedOrigins.join(', ')}`);
 });
 
 export default app;
