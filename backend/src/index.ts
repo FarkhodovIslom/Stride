@@ -18,7 +18,8 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 // Middleware
 const allowedOrigins = [
   FRONTEND_URL,
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'https://tostride.netlify.app'
 ];
 
 app.use(cors({
