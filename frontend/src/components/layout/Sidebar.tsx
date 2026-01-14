@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useSidebarStore } from "@/store/useSidebarStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 
 const navigation = [
@@ -40,7 +40,14 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isMinimized, toggleSidebar } = useSidebarStore();
+  const { logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/auth");
+  };
 
   return (
     <aside className={cn(
@@ -118,7 +125,7 @@ export default function Sidebar() {
           isMinimized ? "p-2" : "px-4 py-4"
         )}>
           <button
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={handleLogout}
             className={cn(
               "flex items-center rounded-lg text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-colors",
               isMinimized ? "justify-center p-3 w-full" : "justify-start gap-3 w-full px-3 py-2.5"

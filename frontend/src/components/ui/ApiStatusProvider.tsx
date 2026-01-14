@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode, useRef } from "react";
+import { usePathname } from "next/navigation";
 import ServerWakeUp from "./ServerWakeUp";
 import { useHealthCheck } from "@/hooks/useHealthCheck";
 
@@ -13,15 +14,19 @@ interface ApiStatusContextType {
 const ApiStatusContext = createContext<ApiStatusContextType | undefined>(undefined);
 
 export function ApiStatusProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
   const [showWakeUp, setShowWakeUp] = useState(false);
   const [pendingRequests, setPendingRequests] = useState(0);
   const { isServerAwake, checkServer } = useHealthCheck();
   const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isWakingUpRef = useRef(false);
 
+  // Check if current page is an auth page (don't show loader on these)
+  const isAuthPage = pathname?.startsWith('/auth');
+
   // Start wake-up sequence
   const startWakeUp = useCallback(async () => {
-    if (isWakingUpRef.current || isServerAwake) return;
+    if (isWakingUpRef.current || isServerAwake || isAuthPage) return;
 
     isWakingUpRef.current = true;
     setShowWakeUp(true);
@@ -45,7 +50,7 @@ export function ApiStatusProvider({ children }: { children: ReactNode }) {
         console.error("Health check failed:", error);
       }
     }, 2000);
-  }, [isServerAwake, checkServer]);
+  }, [isServerAwake, checkServer, isAuthPage]);
 
   // Track pending API requests - setup once on mount
   useEffect(() => {
@@ -75,6 +80,9 @@ export function ApiStatusProvider({ children }: { children: ReactNode }) {
 
   // Monitor server status and show wake-up if needed when requests are pending
   useEffect(() => {
+    // Don't show loader on auth pages
+    if (isAuthPage) return;
+
     if (pendingRequests > 0 && !isServerAwake && !isWakingUpRef.current) {
       setShowWakeUp(true);
     }
@@ -83,7 +91,7 @@ export function ApiStatusProvider({ children }: { children: ReactNode }) {
     if (pendingRequests === 0 && isServerAwake && showWakeUp) {
       setTimeout(() => setShowWakeUp(false), 300);
     }
-  }, [pendingRequests, isServerAwake, showWakeUp]);
+  }, [pendingRequests, isServerAwake, showWakeUp, isAuthPage]);
 
   // Cleanup interval on unmount
   useEffect(() => {
@@ -96,12 +104,15 @@ export function ApiStatusProvider({ children }: { children: ReactNode }) {
 
   // Auto-wake on mount - only once
   useEffect(() => {
+    // Don't auto-wake on auth pages
+    if (isAuthPage) return;
+
     const wakeUpTimer = setTimeout(() => {
       startWakeUp();
     }, 500);
 
     return () => clearTimeout(wakeUpTimer);
-  }, []); // Empty deps - only run once on mount
+  }, [isAuthPage]); // Empty deps - only run once on mount
 
   return (
     <ApiStatusContext.Provider
@@ -111,7 +122,7 @@ export function ApiStatusProvider({ children }: { children: ReactNode }) {
         wakeUpServer: startWakeUp,
       }}
     >
-      {showWakeUp && <ServerWakeUp />}
+      {!isAuthPage && showWakeUp && <ServerWakeUp />}
       {children}
     </ApiStatusContext.Provider>
   );

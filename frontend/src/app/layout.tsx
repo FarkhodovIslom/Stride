@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import './globals.css';
-import SessionProvider from "@/components/providers/SessionProvider";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 import { ApiStatusProvider } from "@/components/ui/ApiStatusProvider";
 
@@ -17,11 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <SessionProvider>
-          <ApiStatusProvider>
-            <ThemeProvider>{children}</ThemeProvider>
-          </ApiStatusProvider>
-        </SessionProvider>
+        <ApiStatusProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </ApiStatusProvider>
       </body>
     </html>
   );
