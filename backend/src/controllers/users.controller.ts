@@ -33,6 +33,28 @@ export class UsersController {
             res.status(400).json({ error: err.message });
         }
     }
+
+    async changePassword(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            if (!req.user?.id) {
+                res.status(401).json({ error: 'Unauthorized' });
+                return;
+            }
+
+            const { currentPassword, newPassword } = req.body;
+            
+            if (!currentPassword || !newPassword) {
+                res.status(400).json({ error: 'Current password and new password are required' });
+                return;
+            }
+
+            await usersService.changePassword(req.user.id, currentPassword, newPassword);
+            res.status(200).json({ message: 'Password changed successfully' });
+        } catch (error) {
+            const err = error as Error;
+            res.status(400).json({ error: err.message });
+        }
+    }
 }
 
 export default new UsersController();

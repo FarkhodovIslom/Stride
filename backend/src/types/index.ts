@@ -3,6 +3,7 @@ export interface User {
     email: string;
     name?: string | null;
     createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface Course {

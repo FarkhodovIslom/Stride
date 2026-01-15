@@ -22,4 +22,13 @@ router.patch('/profile', authenticate, (req, res) =>
     usersController.updateProfile(req, res)
 );
 
+/**
+ * @route   PATCH /users/password
+ * @desc    Change user password
+ * @access  Private
+ */
+router.patch('/password', authenticate, (req, res) =>
+    usersController.changePassword(req, res)
+);
+
 export default router;

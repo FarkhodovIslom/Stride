@@ -3,17 +3,10 @@
 import { useState, useEffect } from "react";
 import { Button, Input, Card, useToast } from "@/components/ui";
 import { useAuthStore } from "@/store/useAuthStore";
-import { RefreshCw, User, Mail, Calendar, Clock } from "lucide-react";
+import { RefreshCw, User as UserIcon, Mail, Calendar, Clock } from "lucide-react";
 import apiClient from "@/lib/api";
 import { motion } from "framer-motion";
-
-interface User {
-  id: string;
-  email: string;
-  name: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+import { User } from "@/types";
 
 export default function UserProfile() {
   const { setUser: setAuthUser } = useAuthStore();
@@ -31,8 +24,14 @@ export default function UserProfile() {
     setError(null);
     try {
       const userData = await apiClient.get<User>("/users/profile", true);
-      setUser(userData);
-      setEditName(userData.name || "");
+      // Convert date strings from API to Date objects
+      const userWithDates = {
+        ...userData,
+        createdAt: new Date(userData.createdAt),
+        updatedAt: new Date(userData.updatedAt),
+      };
+      setUser(userWithDates);
+      setEditName(userWithDates.name || "");
     } catch (err) {
       console.error("Error fetching user profile:", err);
       setError((err as Error).message || "Failed to load user profile");
@@ -79,8 +78,14 @@ export default function UserProfile() {
         { name: editName.trim() },
         true
       );
-      setUser(updatedUser);
-      setAuthUser({ ...updatedUser, createdAt: new Date(updatedUser.createdAt) });
+      // Convert date strings from API to Date objects
+      const userWithDates = {
+        ...updatedUser,
+        createdAt: new Date(updatedUser.createdAt),
+        updatedAt: new Date(updatedUser.updatedAt),
+      };
+      setUser(userWithDates);
+      setAuthUser(userWithDates);
       setIsEditing(false);
       toast.success("Profile updated successfully!");
     } catch (err) {
@@ -130,8 +135,8 @@ export default function UserProfile() {
     return null;
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -172,7 +177,7 @@ export default function UserProfile() {
                 htmlFor="profile-name"
                 className="flex items-center gap-2 text-sm font-medium text-[var(--muted-foreground)] mb-2"
               >
-                <User className="w-4 h-4" aria-hidden="true" />
+                <UserIcon className="w-4 h-4" aria-hidden="true" />
                 Name
               </label>
               {isEditing ? (

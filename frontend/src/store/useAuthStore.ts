@@ -3,13 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import apiClient from "@/lib/api";
-
-interface User {
-  id: string;
-  email: string;
-  name?: string | null;
-  createdAt: Date;
-}
+import { User } from "@/types";
 
 interface AuthState {
   user: User | null;

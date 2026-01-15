@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../config/database';
 import { signToken } from '../utils/jwt';
-import { validateEmail, validatePassword } from '../utils/validation';
+import { validateEmail, validatePasswordStrength } from '../utils/validation';
 
 export class AuthService {
     async register(email: string, password: string, name?: string) {
@@ -9,8 +9,9 @@ export class AuthService {
             throw new Error('Invalid email format');
         }
 
-        if (!validatePassword(password)) {
-            throw new Error('Password must be at least 6 characters');
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.isValid) {
+            throw new Error(`Invalid password: ${passwordValidation.errors.join(', ')}`);
         }
 
         const existingUser = await prisma.user.findUnique({
