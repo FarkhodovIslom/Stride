@@ -25,6 +25,13 @@ export const authenticate = (
 
         try {
             const decoded = verifyToken(token);
+            
+            // Validate MongoDB ObjectId format (24 hex characters)
+            if (!decoded.id.match(/^[0-9a-fA-F]{24}$/)) {
+                res.status(401).json({ error: 'Invalid token format (old session)' });
+                return;
+            }
+
             req.user = decoded;
             next();
         } catch (error) {

@@ -9,6 +9,7 @@ async function seed() {
     // Create a test user
     const hashedPassword = await bcrypt.hash('password123', 10);
     
+    // Using upsert for User to verify transactions support (requires Replica Set)
     const user = await prisma.user.upsert({
         where: { email: 'test@example.com' },
         update: {},
@@ -21,50 +22,68 @@ async function seed() {
 
     console.log('✅ Created test user:', user.email);
 
-    // Create a sample course
-    const course = await prisma.course.upsert({
-        where: { id: 'sample-course-1' },
-        update: {},
-        create: {
-            id: 'sample-course-1',
-            title: 'Introduction to TypeScript',
-            description: 'Learn the basics of TypeScript',
+    // Check if sample course already exists for this user
+    let course = await prisma.course.findFirst({
+        where: { 
             userId: user.id,
+            title: 'Introduction to TypeScript'
         },
     });
 
-    console.log('✅ Created sample course:', course.title);
+    if (!course) {
+        // Create a sample course
+        course = await prisma.course.create({
+            data: {
+                title: 'Introduction to TypeScript',
+                description: 'Learn the basics of TypeScript',
+                userId: user.id,
+            },
+        });
+        console.log('✅ Created sample course:', course.title);
+    } else {
+        console.log('✅ Sample course already exists:', course.title);
+    }
 
-    // Create sample lessons
-    const lessons = await Promise.all([
-        prisma.lesson.create({
-            data: {
-                title: 'Variables and Types',
-                status: 'completed',
-                completed: true,
-                completedAt: new Date(),
-                courseId: course.id,
-            },
-        }),
-        prisma.lesson.create({
-            data: {
-                title: 'Functions and Interfaces',
-                status: 'in-progress',
-                completed: false,
-                courseId: course.id,
-            },
-        }),
-        prisma.lesson.create({
-            data: {
-                title: 'Advanced Types',
-                status: 'planned',
-                completed: false,
-                courseId: course.id,
-            },
-        }),
-    ]);
+    // Check if lessons already exist
+    const existingLessons = await prisma.lesson.findMany({
+        where: { courseId: course.id },
+    });
 
-    console.log(`✅ Created ${lessons.length} sample lessons`);
+    if (existingLessons.length === 0) {
+        // Create sample lessons
+        const lessons = await Promise.all([
+            prisma.lesson.create({
+                data: {
+                    title: 'Variables and Types',
+                    status: 'completed',
+                    completed: true,
+                    completedAt: new Date(),
+                    courseId: course.id,
+                },
+            }),
+            prisma.lesson.create({
+                data: {
+                    title: 'Functions and Interfaces',
+                    status: 'in-progress',
+                    completed: false,
+                    courseId: course.id,
+                },
+            }),
+            prisma.lesson.create({
+                data: {
+                    title: 'Advanced Types',
+                    status: 'planned',
+                    completed: false,
+                    courseId: course.id,
+                },
+            }),
+        ]);
+
+        console.log(`✅ Created ${lessons.length} sample lessons`);
+    } else {
+        console.log(`✅ ${existingLessons.length} lessons already exist`);
+    }
+
     console.log('\n✨ Seed completed successfully!');
     console.log('\n📝 Test credentials:');
     console.log('   Email: test@example.com');

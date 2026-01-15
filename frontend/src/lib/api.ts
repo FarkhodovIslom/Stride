@@ -42,8 +42,9 @@ class ApiClient {
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, config);
 
-    // Handle 401 Unauthorized
-    if (response.status === 401 && typeof window !== 'undefined') {
+    // Handle 401 Unauthorized - but not for auth endpoints (login should show error, not redirect)
+    const isAuthEndpoint = endpoint.startsWith('/auth/');
+    if (response.status === 401 && !isAuthEndpoint && typeof window !== 'undefined') {
       localStorage.removeItem('token');
       document.cookie = 'token=; path=/; max-age=0';
       window.location.href = '/auth';

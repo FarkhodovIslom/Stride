@@ -3,12 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   password  String
   name      String?
@@ -18,10 +18,10 @@ model User {
 }
 
 model Course {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String?
-  userId      String
+  userId      String   @db.ObjectId
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   lessons     Lesson[]
   createdAt   DateTime @default(now())
@@ -31,12 +31,12 @@ model Course {
 }
 
 model Lesson {
-  id          String    @id @default(cuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   status      String    @default("planned")
   completed   Boolean   @default(false)
   completedAt DateTime?
-  courseId    String
+  courseId    String    @db.ObjectId
   course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

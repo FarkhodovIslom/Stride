@@ -6,7 +6,6 @@ export { default as Checkbox } from './Checkbox';
 export { default as EmptyState } from './EmptyState';
 export { default as ProgressBar } from './ProgressBar';
 export { default as Skeleton, CardSkeleton, StatsSkeleton } from './Skeleton';
-export { default as ServerWakeUp } from './ServerWakeUp';
 export { ErrorMessage } from './ErrorMessage';
 export { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 export { ApiStatusProvider, useApiStatus } from "./ApiStatusProvider";
