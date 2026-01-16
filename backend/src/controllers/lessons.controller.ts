@@ -10,11 +10,12 @@ export class LessonsController {
                 return;
             }
 
-            const { title, courseId } = req.body;
+            const { title, courseId, dueDate } = req.body;
             const lesson = await lessonsService.createLesson(
                 courseId,
                 req.user.id,
-                title
+                title,
+                dueDate
             );
             res.status(201).json({ lesson });
         } catch (error) {
@@ -47,11 +48,12 @@ export class LessonsController {
             }
 
             const { id } = req.params;
-            const { title, status, completed } = req.body;
+            const { title, status, completed, dueDate } = req.body;
             const lesson = await lessonsService.updateLesson(id, req.user.id, {
                 title,
                 status,
                 completed,
+                dueDate,
             });
             res.status(200).json({ lesson });
         } catch (error) {

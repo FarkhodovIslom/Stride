@@ -1,7 +1,7 @@
 import prisma from '../config/database';
 
 export class LessonsService {
-    async createLesson(courseId: string, userId: string, title: string) {
+    async createLesson(courseId: string, userId: string, title: string, dueDate?: string) {
         if (!title || title.trim().length === 0) {
             throw new Error('Lesson title is required');
         }
@@ -19,6 +19,7 @@ export class LessonsService {
             data: {
                 title: title.trim(),
                 courseId,
+                dueDate: dueDate ? new Date(dueDate) : null,
             },
         });
 
@@ -46,7 +47,7 @@ export class LessonsService {
     async updateLesson(
         lessonId: string,
         userId: string,
-        data: { title?: string; status?: string; completed?: boolean }
+        data: { title?: string; status?: string; completed?: boolean; dueDate?: string | null }
     ) {
         // Verify lesson belongs to user's course
         const lesson = await prisma.lesson.findFirst({
@@ -65,6 +66,7 @@ export class LessonsService {
             status?: string;
             completed?: boolean;
             completedAt?: Date | null;
+            dueDate?: Date | null;
         } = {};
 
         if (data.title !== undefined) updateData.title = data.title.trim();
@@ -72,6 +74,9 @@ export class LessonsService {
         if (data.completed !== undefined) {
             updateData.completed = data.completed;
             updateData.completedAt = data.completed ? new Date() : null;
+        }
+        if (data.dueDate !== undefined) {
+            updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
         }
 
         const updatedLesson = await prisma.lesson.update({
