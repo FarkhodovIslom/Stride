@@ -74,8 +74,19 @@ model Note {
   category   NoteCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
+  versions   NoteVersion[]
 
   @@index([userId])
   @@index([lessonId])
   @@index([categoryId])
+}
+
+model NoteVersion {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  noteId    String   @db.ObjectId
+  note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([noteId])
 }

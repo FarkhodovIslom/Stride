@@ -47,6 +47,7 @@ export default function RichTextEditor({
         onUpdate: ({ editor }) => {
             onChange(JSON.stringify(editor.getJSON()));
         },
+        immediatelyRender: false,
     });
 
     useEffect(() => {

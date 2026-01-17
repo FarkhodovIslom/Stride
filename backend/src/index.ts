@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import express, { Application } from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes';

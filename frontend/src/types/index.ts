@@ -118,3 +118,10 @@ export interface UpdateCategoryInput {
   color?: string;
 }
 
+export interface NoteVersion {
+  id: string;
+  noteId: string;
+  content: string;
+  createdAt: Date;
+}
+
