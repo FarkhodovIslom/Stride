@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import categoriesController from '../controllers/categories.controller';
-import { authMiddleware } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
-router.use(authMiddleware);
+router.use(authenticate);
 
 router.post('/', categoriesController.createCategory.bind(categoriesController));
 router.get('/', categoriesController.getCategories.bind(categoriesController));

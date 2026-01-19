@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import notesController from '../controllers/notes.controller';
-import { authMiddleware } from '../middleware/auth';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
-router.use(authMiddleware);
+router.use(authenticate);
 
 router.post('/', notesController.createNote.bind(notesController));
 router.get('/', notesController.getNotes.bind(notesController));

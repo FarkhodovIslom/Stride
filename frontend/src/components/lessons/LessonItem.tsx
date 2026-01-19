@@ -23,10 +23,13 @@ function formatDueDate(dueDate: Date | string | null | undefined) {
   const isTomorrow = date.toDateString() === tomorrow.toDateString();
   const isPast = date < now && !isToday;
 
+  // Format time (e.g., "2:30 PM")
+  const timeStr = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
   let display = "";
-  if (isToday) display = "Today";
-  else if (isTomorrow) display = "Tomorrow";
-  else display = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (isToday) display = `Today, ${timeStr}`;
+  else if (isTomorrow) display = `Tomorrow, ${timeStr}`;
+  else display = `${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${timeStr}`;
 
   return { display, isPast, isToday };
 }
