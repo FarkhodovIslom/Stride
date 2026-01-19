@@ -27,6 +27,8 @@ export const config = {
     courses: '/courses',
     lessons: '/lessons',
     dashboard: '/dashboard',
+    notes: '/notes',
+    categories: '/categories',
     health: '/api/health',
   },
 

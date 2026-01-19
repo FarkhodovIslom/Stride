@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, DateTimePicker } from "@/components/ui";
 
 interface AddLessonFormProps {
-  onAdd: (title: string) => Promise<void>;
+  onAdd: (title: string, dueDate?: string) => Promise<void>;
 }
 
 export default function AddLessonForm({ onAdd }: AddLessonFormProps) {
   const [title, setTitle] = useState("");
+  const [dueDate, setDueDate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,20 +18,26 @@ export default function AddLessonForm({ onAdd }: AddLessonFormProps) {
 
     setIsLoading(true);
     try {
-      await onAdd(title.trim());
+      await onAdd(title.trim(), dueDate || undefined);
       setTitle("");
+      setDueDate(null);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-3">
+    <form onSubmit={handleSubmit} className="flex gap-3 items-center flex-wrap">
       <Input
         placeholder="Add a new lesson..."
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        className="flex-1"
+        className="flex-1 min-w-[200px]"
+      />
+      <DateTimePicker
+        value={dueDate || undefined}
+        onChange={(val) => setDueDate(val)}
+        placeholder="Deadline (optional)"
       />
       <Button type="submit" isLoading={isLoading} disabled={!title.trim()}>
         <svg
@@ -51,3 +58,4 @@ export default function AddLessonForm({ onAdd }: AddLessonFormProps) {
     </form>
   );
 }
+

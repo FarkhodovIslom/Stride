@@ -11,4 +11,5 @@ export { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 export { ApiStatusProvider, useApiStatus } from "./ApiStatusProvider";
 export { ErrorBoundary, DashboardErrorFallback } from './ErrorBoundary';
 export { ToastProvider, useToast } from './Toast';
+export { default as DateTimePicker } from './DateTimePicker';
 

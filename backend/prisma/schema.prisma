@@ -8,13 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
-  password  String
-  name      String?
-  courses   Course[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  email          String         @unique
+  password       String
+  name           String?
+  courses        Course[]
+  notes          Note[]
+  noteCategories NoteCategory[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 model Course {
@@ -36,11 +38,44 @@ model Lesson {
   status      String    @default("planned")
   completed   Boolean   @default(false)
   completedAt DateTime?
+  dueDate     DateTime?
   courseId    String    @db.ObjectId
   course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  notes       Note[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([courseId])
   @@index([completed])
+}
+
+model NoteCategory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  color     String   @default("#6366f1")
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes     Note[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Note {
+  id         String        @id @default(auto()) @map("_id") @db.ObjectId
+  title      String
+  content    String        @default("{}")
+  userId     String        @db.ObjectId
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId   String?       @db.ObjectId
+  lesson     Lesson?       @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  categoryId String?       @db.ObjectId
+  category   NoteCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([lessonId])
+  @@index([categoryId])
 }

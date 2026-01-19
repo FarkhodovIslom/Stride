@@ -5,6 +5,8 @@ import usersRoutes from './routes/users.routes';
 import coursesRoutes from './routes/courses.routes';
 import lessonsRoutes from './routes/lessons.routes';
 import dashboardRoutes from './routes/dashboard.routes';
+import notesRoutes from './routes/notes.routes';
+import categoriesRoutes from './routes/categories.routes';
 import { errorHandler } from './middleware/errorHandler';
 import config from './config';
 
@@ -29,6 +31,8 @@ app.use(config.routes.users, usersRoutes);
 app.use(config.routes.courses, coursesRoutes);
 app.use(config.routes.lessons, lessonsRoutes);
 app.use(config.routes.dashboard, dashboardRoutes);
+app.use(config.routes.notes, notesRoutes);
+app.use(config.routes.categories, categoriesRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
