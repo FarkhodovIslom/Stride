@@ -1,27 +1,17 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import notesService from '../services/notes.service';
+import { CreateNoteDto, UpdateNoteDto } from '../dtos/notes.dto';
 
 export class NotesController {
     async createNote(req: AuthRequest, res: Response): Promise<void> {
         try {
-            if (!req.user?.id) {
-                res.status(401).json({ error: 'Unauthorized' });
-                return;
-            }
-
-            const { title, content, lessonId, categoryId } = req.body;
-
-            if (!title || title.trim().length === 0) {
-                res.status(400).json({ error: 'Title is required' });
-                return;
-            }
-
-            const note = await notesService.createNote(req.user.id, {
-                title: title.trim(),
-                content,
-                lessonId,
-                categoryId,
+            const dto = req.body as CreateNoteDto;
+            const note = await notesService.createNote(req.user!.id, {
+                title: dto.title.trim(),
+                content: dto.content,
+                lessonId: dto.lessonId,
+                categoryId: dto.categoryId,
             });
             res.status(201).json({ note });
         } catch (error) {
@@ -32,14 +22,9 @@ export class NotesController {
 
     async getNotes(req: AuthRequest, res: Response): Promise<void> {
         try {
-            if (!req.user?.id) {
-                res.status(401).json({ error: 'Unauthorized' });
-                return;
-            }
-
             const { categoryId } = req.query;
             const notes = await notesService.getNotes(
-                req.user.id,
+                req.user!.id,
                 categoryId as string | undefined
             );
             res.status(200).json({ notes });
@@ -51,13 +36,8 @@ export class NotesController {
 
     async getNote(req: AuthRequest, res: Response): Promise<void> {
         try {
-            if (!req.user?.id) {
-                res.status(401).json({ error: 'Unauthorized' });
-                return;
-            }
-
             const { id } = req.params;
-            const note = await notesService.getNote(id, req.user.id);
+            const note = await notesService.getNote(id, req.user!.id);
             res.status(200).json({ note });
         } catch (error) {
             const err = error as Error;
@@ -67,19 +47,9 @@ export class NotesController {
 
     async updateNote(req: AuthRequest, res: Response): Promise<void> {
         try {
-            if (!req.user?.id) {
-                res.status(401).json({ error: 'Unauthorized' });
-                return;
-            }
-
             const { id } = req.params;
-            const { title, content, lessonId, categoryId } = req.body;
-            const note = await notesService.updateNote(id, req.user.id, {
-                title,
-                content,
-                lessonId,
-                categoryId,
-            });
+            const dto = req.body as UpdateNoteDto;
+            const note = await notesService.updateNote(id, req.user!.id, dto);
             res.status(200).json({ note });
         } catch (error) {
             const err = error as Error;
@@ -89,14 +59,31 @@ export class NotesController {
 
     async deleteNote(req: AuthRequest, res: Response): Promise<void> {
         try {
-            if (!req.user?.id) {
-                res.status(401).json({ error: 'Unauthorized' });
-                return;
-            }
-
             const { id } = req.params;
-            await notesService.deleteNote(id, req.user.id);
+            await notesService.deleteNote(id, req.user!.id);
             res.status(204).send();
+        } catch (error) {
+            const err = error as Error;
+            res.status(400).json({ error: err.message });
+        }
+    }
+
+    async getVersions(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            const { id } = req.params;
+            const versions = await notesService.getNoteVersions(id, req.user!.id);
+            res.status(200).json({ versions });
+        } catch (error) {
+            const err = error as Error;
+            res.status(400).json({ error: err.message });
+        }
+    }
+
+    async restoreVersion(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            const { id, versionId } = req.params;
+            const note = await notesService.restoreNoteVersion(id, versionId, req.user!.id);
+            res.status(200).json({ note });
         } catch (error) {
             const err = error as Error;
             res.status(400).json({ error: err.message });
@@ -105,3 +92,4 @@ export class NotesController {
 }
 
 export default new NotesController();
+

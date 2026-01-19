@@ -3,22 +3,12 @@
 import { useEffect, useState } from "react";
 import { useNotesStore } from "@/store/useNotesStore";
 import RichTextEditor from "@/components/notes/RichTextEditor";
-import { Button, Card, Modal, Input } from "@/components/ui";
-import { cn } from "@/lib/utils";
-import type { Note, NoteCategory } from "@/types";
-
-const CATEGORY_COLORS = [
-    "#6366f1", // Indigo
-    "#8b5cf6", // Violet
-    "#ec4899", // Pink
-    "#ef4444", // Red
-    "#f97316", // Orange
-    "#eab308", // Yellow
-    "#22c55e", // Green
-    "#14b8a6", // Teal
-    "#0ea5e9", // Sky
-    "#6b7280", // Gray
-];
+import { NotesSidebar } from "@/components/notes/NotesSidebar";
+import { NoteHistoryDrawer } from "@/components/notes/NoteHistoryDrawer";
+import { NotesList } from "@/components/notes/NotesList";
+import { Card, Button, Modal } from "@/components/ui";
+import type { Note } from "@/types";
+import { NOTE_DEFAULTS } from "@/config/notes";
 
 export default function NotesPage() {
     const {
@@ -38,11 +28,20 @@ export default function NotesPage() {
         selectCategory,
     } = useNotesStore();
 
-    const [showCategoryModal, setShowCategoryModal] = useState(false);
-    const [newCategoryName, setNewCategoryName] = useState("");
-    const [newCategoryColor, setNewCategoryColor] = useState(CATEGORY_COLORS[0]);
     const [editingTitle, setEditingTitle] = useState(false);
     const [titleValue, setTitleValue] = useState("");
+    const [showHistory, setShowHistory] = useState(false);
+    const [confirmDialog, setConfirmDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    }>({
+        isOpen: false,
+        title: "",
+        message: "",
+        onConfirm: () => { },
+    });
 
     useEffect(() => {
         fetchNotes();
@@ -57,8 +56,8 @@ export default function NotesPage() {
 
     const handleCreateNote = async () => {
         const note = await createNote({
-            title: "Untitled",
-            content: "{}",
+            title: NOTE_DEFAULTS.TITLE,
+            content: NOTE_DEFAULTS.CONTENT,
             categoryId: selectedCategoryId || undefined,
         });
         selectNote(note);
@@ -78,152 +77,57 @@ export default function NotesPage() {
         }
     };
 
-    const handleCreateCategory = async () => {
-        if (!newCategoryName.trim()) return;
-        await createCategory({ name: newCategoryName.trim(), color: newCategoryColor });
-        setNewCategoryName("");
-        setNewCategoryColor(CATEGORY_COLORS[0]);
-        setShowCategoryModal(false);
+    const handleCreateCategoryWrapper = async (name: string, color: string) => {
+        await createCategory({ name, color });
     };
 
     const handleDeleteNote = async (note: Note) => {
-        if (confirm("Are you sure you want to delete this note?")) {
-            await deleteNote(note.id);
-            if (selectedNote?.id === note.id) {
-                selectNote(null);
-            }
-        }
+        setConfirmDialog({
+            isOpen: true,
+            title: "Delete Note",
+            message: "Are you sure you want to delete this note?",
+            onConfirm: async () => {
+                await deleteNote(note.id);
+                if (selectedNote?.id === note.id) {
+                    selectNote(null);
+                }
+                setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+            },
+        });
+    };
+
+    const handleDeleteCategory = async (id: string) => {
+        setConfirmDialog({
+            isOpen: true,
+            title: "Delete Category",
+            message: "Are you sure you want to delete this category? All notes in this category will be uncategorized.",
+            onConfirm: async () => {
+                await deleteCategory(id);
+                setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
+            },
+        });
     };
 
     return (
         <div className="flex h-[calc(100vh-4rem)] gap-4 p-6">
-            {/* Sidebar */}
             <div className="w-72 flex flex-col gap-4">
-                {/* Create Note Button */}
-                <Button onClick={handleCreateNote} className="w-full">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    New Note
-                </Button>
+                <NotesSidebar
+                    notes={notes}
+                    categories={categories}
+                    selectedCategoryId={selectedCategoryId}
+                    onSelectCategory={selectCategory}
+                    onCreateNote={handleCreateNote}
+                    onCreateCategory={handleCreateCategoryWrapper}
+                    onDeleteCategory={handleDeleteCategory}
+                />
 
-                {/* Categories */}
-                <Card className="flex-shrink-0">
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-sm text-[var(--foreground)]">Categories</h3>
-                        <button
-                            onClick={() => setShowCategoryModal(true)}
-                            className="p-1 rounded hover:bg-[var(--muted)] transition-colors"
-                            title="Add category"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                        </button>
-                    </div>
-                    <div className="space-y-1">
-                        <button
-                            onClick={() => selectCategory(null)}
-                            className={cn(
-                                "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                                !selectedCategoryId
-                                    ? "bg-primary-400/10 text-primary-400"
-                                    : "hover:bg-[var(--muted)] text-[var(--muted-foreground)]"
-                            )}
-                        >
-                            <span className="w-3 h-3 rounded-full bg-[var(--muted-foreground)]" />
-                            All Notes
-                            <span className="ml-auto text-xs">{notes.length}</span>
-                        </button>
-                        {categories.map((category) => (
-                            <button
-                                key={category.id}
-                                onClick={() => selectCategory(category.id)}
-                                className={cn(
-                                    "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors group",
-                                    selectedCategoryId === category.id
-                                        ? "bg-primary-400/10 text-primary-400"
-                                        : "hover:bg-[var(--muted)] text-[var(--muted-foreground)]"
-                                )}
-                            >
-                                <span
-                                    className="w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: category.color }}
-                                />
-                                <span className="truncate">{category.name}</span>
-                                <span className="ml-auto text-xs">{category._count?.notes || 0}</span>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (confirm("Delete this category?")) {
-                                            deleteCategory(category.id);
-                                        }
-                                    }}
-                                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-[var(--destructive)]"
-                                >
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </button>
-                        ))}
-                    </div>
-                </Card>
-
-                {/* Notes List */}
-                <div className="flex-1 overflow-auto space-y-2">
-                    {isLoading ? (
-                        <div className="text-center py-4 text-[var(--muted-foreground)]">Loading...</div>
-                    ) : notes.length === 0 ? (
-                        <div className="text-center py-4 text-[var(--muted-foreground)]">
-                            No notes yet. Create one!
-                        </div>
-                    ) : (
-                        notes.map((note) => (
-                            <div
-                                key={note.id}
-                                onClick={() => selectNote(note)}
-                                className={cn(
-                                    "p-3 rounded-lg border cursor-pointer transition-all group",
-                                    selectedNote?.id === note.id
-                                        ? "border-primary-400 bg-primary-400/5"
-                                        : "border-[var(--border)] hover:border-primary-400/50"
-                                )}
-                            >
-                                <div className="flex items-start justify-between gap-2">
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="font-medium text-sm truncate text-[var(--foreground)]">
-                                            {note.title}
-                                        </h4>
-                                        <p className="text-xs text-[var(--muted-foreground)] mt-1">
-                                            {new Date(note.updatedAt).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDeleteNote(note);
-                                        }}
-                                        className="opacity-0 group-hover:opacity-100 p-1 hover:text-[var(--destructive)] transition-opacity"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                {note.category && (
-                                    <span
-                                        className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded text-xs"
-                                        style={{ backgroundColor: `${note.category.color}20`, color: note.category.color }}
-                                    >
-                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: note.category.color }} />
-                                        {note.category.name}
-                                    </span>
-                                )}
-                            </div>
-                        ))
-                    )}
-                </div>
+                <NotesList
+                    notes={notes}
+                    selectedNoteId={selectedNote?.id}
+                    isLoading={isLoading}
+                    onSelectNote={selectNote}
+                    onDeleteNote={handleDeleteNote}
+                />
             </div>
 
             {/* Editor Area */}
@@ -252,6 +156,15 @@ export default function NotesPage() {
                             )}
                             <div className="flex items-center gap-4 mt-2 text-sm text-[var(--muted-foreground)]">
                                 <span>Last updated: {new Date(selectedNote.updatedAt).toLocaleString()}</span>
+                                <button
+                                    onClick={() => setShowHistory(true)}
+                                    className="flex items-center gap-1 hover:text-primary-400 transition-colors"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    History
+                                </button>
                                 {selectedNote.lesson && (
                                     <span className="flex items-center gap-1">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -283,38 +196,29 @@ export default function NotesPage() {
                     </div>
                 )}
             </div>
+            {/* History Drawer */}
+            <NoteHistoryDrawer isOpen={showHistory} onClose={() => setShowHistory(false)} />
 
-            {/* Category Modal */}
-            <Modal isOpen={showCategoryModal} onClose={() => setShowCategoryModal(false)} title="Create Category">
+            {/* Confirm Dialog */}
+            <Modal
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
+                title={confirmDialog.title}
+            >
                 <div className="space-y-4">
-                    <Input
-                        label="Category Name"
-                        placeholder="e.g., Work, Personal, Ideas..."
-                        value={newCategoryName}
-                        onChange={(e) => setNewCategoryName(e.target.value)}
-                    />
-                    <div>
-                        <label className="block text-sm font-medium mb-2 text-[var(--foreground)]">Color</label>
-                        <div className="flex gap-2 flex-wrap">
-                            {CATEGORY_COLORS.map((color) => (
-                                <button
-                                    key={color}
-                                    onClick={() => setNewCategoryColor(color)}
-                                    className={cn(
-                                        "w-8 h-8 rounded-full transition-transform",
-                                        newCategoryColor === color && "ring-2 ring-offset-2 ring-primary-400 scale-110"
-                                    )}
-                                    style={{ backgroundColor: color }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                    <div className="flex gap-2 justify-end">
-                        <Button variant="secondary" onClick={() => setShowCategoryModal(false)}>
+                    <p className="text-[var(--muted-foreground)]">{confirmDialog.message}</p>
+                    <div className="flex justify-end gap-2">
+                        <Button
+                            variant="ghost"
+                            onClick={() => setConfirmDialog((prev) => ({ ...prev, isOpen: false }))}
+                        >
                             Cancel
                         </Button>
-                        <Button onClick={handleCreateCategory} disabled={!newCategoryName.trim()}>
-                            Create
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDialog.onConfirm}
+                        >
+                            Delete
                         </Button>
                     </div>
                 </div>

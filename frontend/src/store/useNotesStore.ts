@@ -8,6 +8,7 @@ import type {
   UpdateNoteInput,
   CreateCategoryInput,
   UpdateCategoryInput,
+  NoteVersion,
 } from "@/types";
 import apiClient from "@/lib/api";
 
@@ -33,6 +34,11 @@ interface NotesStore {
   updateCategory: (id: string, data: UpdateCategoryInput) => Promise<void>;
   deleteCategory: (id: string) => Promise<void>;
   selectCategory: (categoryId: string | null) => void;
+
+  // Version actions
+  versions: NoteVersion[];
+  fetchVersions: (noteId: string) => Promise<void>;
+  restoreVersion: (noteId: string, versionId: string) => Promise<void>;
 }
 
 export const useNotesStore = create<NotesStore>((set, get) => ({
@@ -124,5 +130,32 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   selectCategory: (categoryId: string | null) => {
     set({ selectedCategoryId: categoryId });
     get().fetchNotes(categoryId || undefined);
+  },
+
+  // Version actions
+  versions: [],
+  fetchVersions: async (noteId: string) => {
+      try {
+          const data = await apiClient.get<{ versions: NoteVersion[] }>(`/notes/${noteId}/versions`, true);
+          set({ versions: data.versions });
+      } catch (error) {
+          set({ error: (error as Error).message });
+      }
+  },
+
+  restoreVersion: async (noteId: string, versionId: string) => {
+      try {
+        const response = await apiClient.post<{ note: Note }>(`/notes/${noteId}/versions/${versionId}/restore`, {}, true);
+        
+        set({
+            selectedNote: response.note,
+            notes: get().notes.map((n) => (n.id === noteId ? response.note : n)),
+        });
+
+        // Refetch versions to see the new snapshot created during restore
+        get().fetchVersions(noteId);
+      } catch (error) {
+        set({ error: (error as Error).message });
+      }
   },
 }));

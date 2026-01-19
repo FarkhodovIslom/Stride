@@ -63,11 +63,18 @@ export default function DateTimePicker({
 
     return (
         <div ref={containerRef} className={cn("relative", className)}>
-            <button
-                type="button"
+            <div
+                role="button"
+                tabIndex={0}
                 onClick={() => setIsOpen(!isOpen)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setIsOpen(!isOpen);
+                    }
+                }}
                 className={cn(
-                    "flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-[var(--border)]",
+                    "flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-[var(--border)] cursor-pointer",
                     "bg-[var(--background)] hover:bg-[var(--muted)] transition-colors",
                     "focus:outline-none focus:ring-2 focus:ring-primary-400/50",
                     displayInfo?.isPast && "text-[var(--destructive)] border-[var(--destructive)]/30",
@@ -103,7 +110,7 @@ export default function DateTimePicker({
                         </svg>
                     </button>
                 )}
-            </button>
+            </div>
 
             {/* Dropdown */}
             {isOpen && (
