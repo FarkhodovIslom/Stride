@@ -11,6 +11,27 @@ export class NotesService {
         userId: string,
         data: { title: string; content?: string; lessonId?: string; categoryId?: string }
     ): Promise<NoteWithRelations> {
+        // Validate lesson ownership if lessonId is provided
+        if (data.lessonId) {
+            const lesson = await prisma.lesson.findFirst({
+                where: { id: data.lessonId },
+                include: { course: true },
+            });
+            if (!lesson || lesson.course.userId !== userId) {
+                throw new Error('Invalid lesson ID or you do not have access to this lesson');
+            }
+        }
+
+        // Validate category ownership if categoryId is provided
+        if (data.categoryId) {
+            const category = await prisma.noteCategory.findFirst({
+                where: { id: data.categoryId, userId },
+            });
+            if (!category) {
+                throw new Error('Invalid category ID or you do not have access to this category');
+            }
+        }
+
         const note = await prisma.note.create({
             data: {
                 title: data.title,
@@ -69,6 +90,27 @@ export class NotesService {
 
         if (!note) {
             throw new Error('Note not found');
+        }
+
+        // Validate lesson ownership if lessonId is being changed
+        if (data.lessonId !== undefined && data.lessonId !== null) {
+            const lesson = await prisma.lesson.findFirst({
+                where: { id: data.lessonId },
+                include: { course: true },
+            });
+            if (!lesson || lesson.course.userId !== userId) {
+                throw new Error('Invalid lesson ID or you do not have access to this lesson');
+            }
+        }
+
+        // Validate category ownership if categoryId is being changed
+        if (data.categoryId !== undefined && data.categoryId !== null) {
+            const category = await prisma.noteCategory.findFirst({
+                where: { id: data.categoryId, userId },
+            });
+            if (!category) {
+                throw new Error('Invalid category ID or you do not have access to this category');
+            }
         }
 
         // Create a version snapshot of the current state if content or title is changing

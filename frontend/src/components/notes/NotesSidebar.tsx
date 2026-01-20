@@ -5,6 +5,7 @@ import { Button, Card, Modal, Input } from "@/components/ui";
 import { NOTES_CATEGORY_COLORS } from "@/config/notes";
 import type { Note, NoteCategory } from "@/types";
 import { useState } from "react";
+import { useTranslation } from "@/lib/i18n";
 
 interface NotesSidebarProps {
     notes: Note[];
@@ -25,6 +26,7 @@ export function NotesSidebar({
     onCreateCategory,
     onDeleteCategory,
 }: NotesSidebarProps) {
+    const { t } = useTranslation();
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState("");
     const [newCategoryColor, setNewCategoryColor] = useState(NOTES_CATEGORY_COLORS[0]);
@@ -44,17 +46,17 @@ export function NotesSidebar({
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                New Note
+                {t('notes.newNote')}
             </Button>
 
             {/* Categories */}
             <Card className="flex-shrink-0">
                 <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-sm text-[var(--foreground)]">Categories</h3>
+                    <h3 className="font-semibold text-sm text-[var(--foreground)]">{t('notes.categories')}</h3>
                     <button
                         onClick={() => setShowCategoryModal(true)}
                         className="p-1 rounded hover:bg-[var(--muted)] transition-colors"
-                        title="Add category"
+                        title={t('notes.createCategory')}
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -72,7 +74,7 @@ export function NotesSidebar({
                         )}
                     >
                         <span className="w-3 h-3 rounded-full bg-[var(--muted-foreground)]" />
-                        All Notes
+                        {t('notes.allNotes')}
                         <span className="ml-auto text-xs">{notes.length}</span>
                     </button>
                     {categories.map((category) => (
@@ -109,16 +111,16 @@ export function NotesSidebar({
             </Card>
 
             {/* Category Modal */}
-            <Modal isOpen={showCategoryModal} onClose={() => setShowCategoryModal(false)} title="Create Category">
+            <Modal isOpen={showCategoryModal} onClose={() => setShowCategoryModal(false)} title={t('notes.createCategory')}>
                 <div className="space-y-4">
                     <Input
-                        label="Category Name"
-                        placeholder="e.g., Work, Personal, Ideas..."
+                        label={t('notes.categoryName')}
+                        placeholder={t('notes.categoryPlaceholder')}
                         value={newCategoryName}
                         onChange={(e) => setNewCategoryName(e.target.value)}
                     />
                     <div>
-                        <label className="block text-sm font-medium mb-2 text-[var(--foreground)]">Color</label>
+                        <label className="block text-sm font-medium mb-2 text-[var(--foreground)]">{t('notes.color')}</label>
                         <div className="flex gap-2 flex-wrap">
                             {NOTES_CATEGORY_COLORS.map((color) => (
                                 <button
@@ -135,10 +137,10 @@ export function NotesSidebar({
                     </div>
                     <div className="flex gap-2 justify-end">
                         <Button variant="secondary" onClick={() => setShowCategoryModal(false)}>
-                            Cancel
+                            {t('notes.cancel')}
                         </Button>
                         <Button onClick={handleCreateCategory} disabled={!newCategoryName.trim()}>
-                            Create
+                            {t('notes.create')}
                         </Button>
                     </div>
                 </div>
