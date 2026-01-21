@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { Note } from "@/types";
+import { useTranslation } from "@/lib/i18n";
 
 interface NotesListProps {
     notes: Note[];
@@ -18,14 +19,16 @@ export function NotesList({
     onSelectNote,
     onDeleteNote,
 }: NotesListProps) {
+    const { t } = useTranslation();
+
     if (isLoading) {
-        return <div className="text-center py-4 text-[var(--muted-foreground)]">Loading...</div>;
+        return <div className="text-center py-4 text-[var(--muted-foreground)]">{t('notes.loading')}</div>;
     }
 
     if (notes.length === 0) {
         return (
             <div className="text-center py-4 text-[var(--muted-foreground)]">
-                No notes yet. Create one!
+                {t('notes.noNotes')}
             </div>
         );
     }

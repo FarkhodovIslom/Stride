@@ -4,6 +4,7 @@ import ThemeProvider from "@/components/providers/ThemeProvider";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { ApiStatusProvider } from "@/components/ui/ApiStatusProvider";
 import { ToastProvider } from "@/components/ui/Toast";
+import { I18nProvider } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "Stride - Learning Progress Dashboard",
@@ -21,7 +22,9 @@ export default function RootLayout({
         <QueryProvider>
           <ApiStatusProvider>
             <ThemeProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <I18nProvider>
+                <ToastProvider>{children}</ToastProvider>
+              </I18nProvider>
             </ThemeProvider>
           </ApiStatusProvider>
         </QueryProvider>

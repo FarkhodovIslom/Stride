@@ -11,7 +11,8 @@ export const NOTES_CATEGORY_COLORS = [
     "#6b7280", // Gray
 ];
 
+// Note: Default values are hardcoded here, translations happen at component level
 export const NOTE_DEFAULTS = {
-    TITLE: "Untitled",
+    TITLE: "Untitled", // This will be translated in the component
     CONTENT: "{}",
 };
