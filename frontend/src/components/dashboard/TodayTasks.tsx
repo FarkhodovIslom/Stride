@@ -13,7 +13,9 @@ interface TodayTasksProps {
 }
 
 export default function TodayTasks({ tasks, onToggleComplete, completingTasks }: TodayTasksProps) {
-  if (tasks.length === 0) {
+  const activeTasks = tasks.filter(task => !task.completed);
+
+  if (activeTasks.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -59,7 +61,7 @@ export default function TodayTasks({ tasks, onToggleComplete, completingTasks }:
             className="text-sm text-[var(--muted-foreground)]"
             aria-live="polite"
           >
-            {tasks.length} remaining
+            {activeTasks.length} remaining
           </span>
         </div>
         <ul
@@ -68,7 +70,7 @@ export default function TodayTasks({ tasks, onToggleComplete, completingTasks }:
           aria-labelledby="today-tasks-heading"
         >
           <AnimatePresence mode="popLayout">
-            {tasks.map((task, index) => {
+            {activeTasks.map((task, index) => {
               const isCompleting = completingTasks?.has(task.id);
               return (
                 <motion.li

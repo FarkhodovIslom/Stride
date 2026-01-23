@@ -100,7 +100,7 @@ function DashboardContent() {
             />
             <StreakDisplay
               streak={stats.streak}
-              aria-label={`Learning streak: ${stats.streak} days`}
+              aria-label={`Learning streak: ${stats.streak} ${stats.streak === 1 ? 'day' : 'days'}`}
             />
           </div>
 
