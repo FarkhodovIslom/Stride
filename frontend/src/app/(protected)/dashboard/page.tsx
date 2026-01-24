@@ -73,48 +73,51 @@ function DashboardContent() {
         />
       ) : stats ? (
         <>
-          {/* Stats Grid */}
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-            role="region"
-            aria-label="Learning statistics"
-          >
-            <StatsCard
-              title="Total Courses"
-              value={stats.totalCourses}
-              icon={<BookOpen className="w-6 h-6" aria-hidden="true" />}
-              aria-label={`Total courses: ${stats.totalCourses}`}
-            />
-            <StatsCard
-              title="Total Lessons"
-              value={stats.totalLessons}
-              icon={<FileText className="w-6 h-6" aria-hidden="true" />}
-              aria-label={`Total lessons: ${stats.totalLessons}`}
-            />
-            <StatsCard
-              title="Completed"
-              value={stats.completedLessons}
-              icon={<CheckCircle className="w-6 h-6" aria-hidden="true" />}
-              subtitle={`${stats.progressPercentage}% complete`}
-              aria-label={`Completed lessons: ${stats.completedLessons}, ${stats.progressPercentage}% complete`}
-            />
-            <StreakDisplay
-              streak={stats.streak}
-              aria-label={`Learning streak: ${stats.streak} days`}
-            />
-          </div>
+          {/* Dashboard Main Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column: Progress & Stats */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Overall Progress - Prominent */}
+              <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-1 shadow-sm">
+                <ProgressChart
+                  completed={stats.completedLessons}
+                  total={stats.totalLessons}
+                />
+              </div>
 
-          {/* Charts and Tasks */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ProgressChart
-              completed={stats.completedLessons}
-              total={stats.totalLessons}
-            />
-            <TodayTasks
-              tasks={stats.todayTasks}
-              onToggleComplete={handleToggleComplete}
-              completingTasks={completingTasks}
-            />
+              {/* Quick Stats Grid */}
+              <div
+                className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                role="region"
+                aria-label="Learning statistics"
+              >
+                <StatsCard
+                  title="Active Courses"
+                  value={stats.activeCourses}
+                  icon={<BookOpen className="w-5 h-5" aria-hidden="true" />}
+                  aria-label={`Active courses: ${stats.activeCourses}`}
+                />
+                <StatsCard
+                  title="Tasks Remaining"
+                  value={stats.totalLessons - stats.completedLessons}
+                  icon={<FileText className="w-5 h-5" aria-hidden="true" />}
+                  aria-label={`Tasks remaining: ${stats.totalLessons - stats.completedLessons}`}
+                />
+                <StreakDisplay
+                  streak={stats.streak}
+                  aria-label={`Learning streak: ${stats.streak} ${stats.streak === 1 ? 'day' : 'days'}`}
+                />
+              </div>
+            </div>
+
+            {/* Right Column: Today's Tasks */}
+            <div className="lg:col-span-1">
+              <TodayTasks
+                tasks={stats.todayTasks}
+                onToggleComplete={handleToggleComplete}
+                completingTasks={completingTasks}
+              />
+            </div>
           </div>
         </>
       ) : null}
