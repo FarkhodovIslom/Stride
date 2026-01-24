@@ -73,51 +73,36 @@ function DashboardContent() {
         />
       ) : stats ? (
         <>
-          {/* Dashboard Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column: Progress & Stats */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Overall Progress - Prominent */}
-              <div className="bg-[var(--card)] rounded-xl border border-[var(--border)] p-1 shadow-sm">
-                <ProgressChart
-                  completed={stats.completedLessons}
-                  total={stats.totalLessons}
-                />
-              </div>
-
-              {/* Quick Stats Grid */}
-              <div
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                role="region"
-                aria-label="Learning statistics"
-              >
-                <StatsCard
-                  title="Active Courses"
-                  value={stats.activeCourses}
-                  icon={<BookOpen className="w-5 h-5" aria-hidden="true" />}
-                  aria-label={`Active courses: ${stats.activeCourses}`}
-                />
-                <StatsCard
-                  title="Completed Courses"
-                  value={stats.completedCourses}
-                  icon={<CheckCircle className="w-5 h-5" aria-hidden="true" />}
-                  aria-label={`Completed courses: ${stats.completedCourses}`}
-                />
-                <StatsCard
-                  title={stats.totalCourses > 0 ? "Tasks Remaining" : "Total Lessons"}
-                  value={stats.totalCourses > 0 ? stats.totalLessons - stats.completedLessons : stats.totalLessons}
-                  icon={<FileText className="w-5 h-5" aria-hidden="true" />}
-                  aria-label={stats.totalCourses > 0
-                    ? `Tasks remaining: ${stats.totalLessons - stats.completedLessons}`
-                    : `Total lessons: ${stats.totalLessons}`
-                  }
-                />
-                <StreakDisplay
-                  streak={stats.streak}
-                  aria-label={`Learning streak: ${stats.streak} ${stats.streak === 1 ? 'day' : 'days'}`}
-                />
-              </div>
-            </div>
+          {/* Stats Grid */}
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+            role="region"
+            aria-label="Learning statistics"
+          >
+            <StatsCard
+              title="Total Courses"
+              value={stats.totalCourses}
+              icon={<BookOpen className="w-6 h-6" aria-hidden="true" />}
+              aria-label={`Total courses: ${stats.totalCourses}`}
+            />
+            <StatsCard
+              title="Total Lessons"
+              value={stats.totalLessons}
+              icon={<FileText className="w-6 h-6" aria-hidden="true" />}
+              aria-label={`Total lessons: ${stats.totalLessons}`}
+            />
+            <StatsCard
+              title="Completed"
+              value={stats.completedLessons}
+              icon={<CheckCircle className="w-6 h-6" aria-hidden="true" />}
+              subtitle={`${stats.progressPercentage}% complete`}
+              aria-label={`Completed lessons: ${stats.completedLessons}, ${stats.progressPercentage}% complete`}
+            />
+            <StreakDisplay
+              streak={stats.streak}
+              aria-label={`Learning streak: ${stats.streak} ${stats.streak === 1 ? 'day' : 'days'}`}
+            />
+          </div>
 
             {/* Right Column: Today's Tasks */}
             <div className="lg:col-span-1">

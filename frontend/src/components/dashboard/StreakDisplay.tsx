@@ -27,7 +27,7 @@ export default function StreakDisplay({ streak, "aria-label": ariaLabel }: Strea
       <Card
         className="relative overflow-hidden bg-gradient-to-br from-orange-500/10 to-red-500/10 border-orange-500/20 group hover:shadow-lg transition-shadow"
         role="article"
-        aria-label={ariaLabel || `Learning streak: ${streak} days. ${getMessage()}`}
+        aria-label={ariaLabel || `Learning streak: ${streak} ${streak === 1 ? "day" : "days"}. ${getMessage()}`}
       >
         <div className="flex items-center gap-4">
           <motion.div
@@ -48,7 +48,7 @@ export default function StreakDisplay({ streak, "aria-label": ariaLabel }: Strea
               animate={{ scale: 1 }}
               transition={{ duration: 0.2, delay: 0.2 }}
             >
-              {streak} <span className="text-lg font-normal">days</span>
+              {streak} <span className="text-lg font-normal">{streak === 1 ? "day" : "days"}</span>
             </motion.p>
             <p className="text-sm text-orange-500 mt-1" aria-live="polite">
               {getMessage()}

@@ -13,13 +13,20 @@ interface TodayTasksProps {
   totalCourses: number;
 }
 
-export default function TodayTasks({ tasks, onToggleComplete, completingTasks, totalCourses }: TodayTasksProps) {
+export default function TodayTasks({ tasks, onToggleComplete, completingTasks }: TodayTasksProps) {
   const activeTasks = tasks.filter(task => !task.completed);
 
-  const renderEmptyState = () => {
-    if (totalCourses === 0) {
-      return (
-        <div className="py-8">
+  if (activeTasks.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      >
+        <Card>
+          <h3 className="font-semibold text-[var(--foreground)] mb-4">
+            Today&apos;s Tasks
+          </h3>
           <EmptyState
             icon={<BookOpen className="w-10 h-10 text-primary-500" aria-hidden="true" />}
             title="Start your journey!"
@@ -61,29 +68,31 @@ export default function TodayTasks({ tasks, onToggleComplete, completingTasks, t
             {activeTasks.length} remaining
           </span>
         </div>
-
-        {activeTasks.length === 0 ? (
-          renderEmptyState()
-        ) : (
-          <ul
-            className="space-y-3 mb-6"
-            role="list"
-            aria-labelledby="today-tasks-heading"
-          >
-            <AnimatePresence mode="popLayout">
-              {activeTasks.map((task, index) => {
-                const isCompleting = completingTasks?.has(task.id);
-                return (
-                  <motion.li
-                    key={task.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: -50, height: 0, transition: { duration: 0.3 } }}
-                    transition={{
-                      duration: 0.2,
-                      delay: index * 0.05,
-                    }}
-                    layout
+        <ul
+          className="space-y-3"
+          role="list"
+          aria-labelledby="today-tasks-heading"
+        >
+          <AnimatePresence mode="popLayout">
+            {activeTasks.map((task, index) => {
+              const isCompleting = completingTasks?.has(task.id);
+              return (
+                <motion.li
+                  key={task.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -50, height: 0, transition: { duration: 0.3 } }}
+                  transition={{
+                    duration: 0.2,
+                    delay: index * 0.05,
+                  }}
+                  layout
+                >
+                  <div
+                    className={`flex items-center gap-3 p-3 rounded-lg bg-[var(--muted)]/50 hover:bg-[var(--muted)] transition-all group ${isCompleting ? "opacity-50" : ""
+                      }`}
+                    role="listitem"
+                    aria-busy={isCompleting}
                   >
                     <div
                       className={`flex items-center gap-3 p-3 rounded-lg bg-[var(--muted)]/50 hover:bg-[var(--muted)] transition-all group ${isCompleting ? "opacity-50" : ""
