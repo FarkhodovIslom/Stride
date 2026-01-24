@@ -42,9 +42,15 @@ export class DashboardService {
             c.lessons.some((l) => !l.completed)
         ).length;
 
+        // Completed courses (courses with all lessons completed)
+        const completedCourses = courses.filter((c) =>
+            c.lessons.length > 0 && c.lessons.every((l) => l.completed)
+        ).length;
+
         return {
             totalCourses: courses.length,
             activeCourses,
+            completedCourses,
             totalLessons,
             completedLessons,
             progressPercentage,

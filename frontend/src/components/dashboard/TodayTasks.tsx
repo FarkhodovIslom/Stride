@@ -3,17 +3,42 @@
 import { Card, EmptyState, Checkbox } from "@/components/ui";
 import type { Lesson } from "@/types";
 import Link from "next/link";
-import { CheckCircle, Plus } from "lucide-react";
+import { CheckCircle, Plus, BookOpen } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface TodayTasksProps {
   tasks: Lesson[];
   onToggleComplete?: (id: string, courseId: string) => void;
   completingTasks?: Set<string>;
+  totalCourses: number;
 }
 
-export default function TodayTasks({ tasks, onToggleComplete, completingTasks }: TodayTasksProps) {
+export default function TodayTasks({ tasks, onToggleComplete, completingTasks, totalCourses }: TodayTasksProps) {
   const activeTasks = tasks.filter(task => !task.completed);
+
+  const renderEmptyState = () => {
+    if (totalCourses === 0) {
+      return (
+        <div className="py-8">
+          <EmptyState
+            icon={<BookOpen className="w-10 h-10 text-primary-500" aria-hidden="true" />}
+            title="Start your journey!"
+            description="You haven't joined any courses yet. Browse to get started."
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="py-8">
+        <EmptyState
+          icon={<CheckCircle className="w-10 h-10 text-green-500" aria-hidden="true" />}
+          title="All caught up!"
+          description="Great job! You've completed all your planned tasks for today."
+        />
+      </div>
+    );
+  };
 
   return (
     <motion.div
@@ -38,13 +63,7 @@ export default function TodayTasks({ tasks, onToggleComplete, completingTasks }:
         </div>
 
         {activeTasks.length === 0 ? (
-          <div className="py-8">
-            <EmptyState
-              icon={<CheckCircle className="w-10 h-10 text-green-500" aria-hidden="true" />}
-              title="All caught up!"
-              description="You have no pending tasks."
-            />
-          </div>
+          renderEmptyState()
         ) : (
           <ul
             className="space-y-3 mb-6"

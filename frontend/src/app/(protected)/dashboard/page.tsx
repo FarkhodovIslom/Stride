@@ -87,7 +87,7 @@ function DashboardContent() {
 
               {/* Quick Stats Grid */}
               <div
-                className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
                 role="region"
                 aria-label="Learning statistics"
               >
@@ -98,10 +98,19 @@ function DashboardContent() {
                   aria-label={`Active courses: ${stats.activeCourses}`}
                 />
                 <StatsCard
-                  title="Tasks Remaining"
-                  value={stats.totalLessons - stats.completedLessons}
+                  title="Completed Courses"
+                  value={stats.completedCourses}
+                  icon={<CheckCircle className="w-5 h-5" aria-hidden="true" />}
+                  aria-label={`Completed courses: ${stats.completedCourses}`}
+                />
+                <StatsCard
+                  title={stats.totalCourses > 0 ? "Tasks Remaining" : "Total Lessons"}
+                  value={stats.totalCourses > 0 ? stats.totalLessons - stats.completedLessons : stats.totalLessons}
                   icon={<FileText className="w-5 h-5" aria-hidden="true" />}
-                  aria-label={`Tasks remaining: ${stats.totalLessons - stats.completedLessons}`}
+                  aria-label={stats.totalCourses > 0
+                    ? `Tasks remaining: ${stats.totalLessons - stats.completedLessons}`
+                    : `Total lessons: ${stats.totalLessons}`
+                  }
                 />
                 <StreakDisplay
                   streak={stats.streak}
@@ -116,6 +125,7 @@ function DashboardContent() {
                 tasks={stats.todayTasks}
                 onToggleComplete={handleToggleComplete}
                 completingTasks={completingTasks}
+                totalCourses={stats.totalCourses}
               />
             </div>
           </div>
