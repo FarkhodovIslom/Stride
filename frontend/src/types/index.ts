@@ -58,6 +58,7 @@ export interface UpdateLessonInput {
 
 export interface DashboardStats {
   totalCourses: number;
+  activeCourses: number;
   totalLessons: number;
   completedLessons: number;
   progressPercentage: number;

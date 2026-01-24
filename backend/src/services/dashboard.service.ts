@@ -37,8 +37,14 @@ export class DashboardService {
                 updatedAt: l.updatedAt,
             }));
 
+        // Active courses (courses with at least one incomplete lesson)
+        const activeCourses = courses.filter((c) =>
+            c.lessons.some((l) => !l.completed)
+        ).length;
+
         return {
             totalCourses: courses.length,
+            activeCourses,
             totalLessons,
             completedLessons,
             progressPercentage,
