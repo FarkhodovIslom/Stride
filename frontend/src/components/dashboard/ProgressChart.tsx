@@ -15,15 +15,20 @@ interface ProgressChartProps {
 }
 
 export default function ProgressChart({ completed, total }: ProgressChartProps) {
+  const isEmpty = total === 0;
   const remaining = total - completed;
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-  const data = [
-    { name: "Completed", value: completed },
-    { name: "Remaining", value: remaining || (total === 0 ? 1 : 0) },
-  ];
+  const data = isEmpty
+    ? [{ name: "Empty", value: 1 }]
+    : [
+      { name: "Completed", value: completed },
+      { name: "Remaining", value: remaining },
+    ];
 
-  const COLORS = ["hsl(var(--primary))", "var(--muted)"];
+  const COLORS = isEmpty
+    ? ["var(--muted)"]
+    : ["hsl(var(--primary))", "var(--muted)"];
 
   return (
     <motion.div
@@ -34,8 +39,9 @@ export default function ProgressChart({ completed, total }: ProgressChartProps) 
       <Card
         className="hover:shadow-lg transition-shadow"
         role="figure"
-        aria-label={`Overall progress: ${completed} of ${total} lessons completed (${percentage}%)`}
+        aria-label={`Overall progress: ${isEmpty ? "No lessons yet" : `${completed} of ${total} lessons completed (${percentage}%)`}`}
       >
+        <div className="p-6">
         <h3
           className="font-semibold text-[var(--foreground)] mb-4"
           id="progress-chart-title"
@@ -56,21 +62,21 @@ export default function ProgressChart({ completed, total }: ProgressChartProps) 
                   cy="50%"
                   innerRadius={35}
                   outerRadius={50}
-                  paddingAngle={2}
+                  paddingAngle={isEmpty ? 0 : 2}
                   dataKey="value"
                   strokeWidth={0}
                   animationBegin={0}
                   animationDuration={800}
                 >
                   {data.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex items-center justify-center">
               <motion.span
-                className="text-2xl font-bold text-[var(--foreground)]"
+                className={`text-2xl font-bold ${isEmpty ? "text-[var(--muted-foreground)] opacity-50" : "text-[var(--foreground)]"}`}
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: 0.4 }}
@@ -80,39 +86,51 @@ export default function ProgressChart({ completed, total }: ProgressChartProps) 
             </div>
           </div>
           <div className="flex-1" id="progress-chart-summary">
-            <div className="space-y-2">
+            {isEmpty ? (
               <motion.div
-                className="flex items-center gap-2"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 0.5 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-[var(--muted-foreground)] italic"
               >
-                <div
-                  className="w-3 h-3 rounded-full bg-primary-400"
-                  aria-hidden="true"
-                />
-                <span className="text-sm text-[var(--muted-foreground)]">
-                  Completed: <strong className="text-[var(--foreground)]">{completed}</strong>
-                </span>
+                No lessons yet. Add lessons to start tracking your progress.
               </motion.div>
-              <motion.div
-                className="flex items-center gap-2"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: 0.6 }}
-              >
-                <div
-                  className="w-3 h-3 rounded-full bg-[var(--muted)]"
-                  aria-hidden="true"
-                />
-                <span className="text-sm text-[var(--muted-foreground)]">
-                  Remaining: <strong className="text-[var(--foreground)]">{remaining}</strong>
-                </span>
-              </motion.div>
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <motion.div
+                  className="flex items-center gap-2"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.5 }}
+                >
+                  <div
+                    className="w-3 h-3 rounded-full bg-primary-400"
+                    aria-hidden="true"
+                  />
+                  <span className="text-sm text-[var(--muted-foreground)]">
+                    Completed: <strong className="text-[var(--foreground)]">{completed}</strong>
+                  </span>
+                </motion.div>
+                <motion.div
+                  className="flex items-center gap-2"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.6 }}
+                >
+                  <div
+                    className="w-3 h-3 rounded-full bg-[var(--muted)]"
+                    aria-hidden="true"
+                  />
+                  <span className="text-sm text-[var(--muted-foreground)]">
+                    Remaining: <strong className="text-[var(--foreground)]">{remaining}</strong>
+                  </span>
+                </motion.div>
+              </div>
+            )}
           </div>
         </div>
-      </Card>
-    </motion.div>
+      </div>
+    </Card>
+    </motion.div >
   );
 }

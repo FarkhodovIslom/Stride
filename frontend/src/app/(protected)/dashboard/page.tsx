@@ -104,17 +104,15 @@ function DashboardContent() {
             />
           </div>
 
-          {/* Charts and Tasks */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ProgressChart
-              completed={stats.completedLessons}
-              total={stats.totalLessons}
-            />
-            <TodayTasks
-              tasks={stats.todayTasks}
-              onToggleComplete={handleToggleComplete}
-              completingTasks={completingTasks}
-            />
+            {/* Right Column: Today's Tasks */}
+            <div className="lg:col-span-1">
+              <TodayTasks
+                tasks={stats.todayTasks}
+                onToggleComplete={handleToggleComplete}
+                completingTasks={completingTasks}
+                totalCourses={stats.totalCourses}
+              />
+            </div>
           </div>
         </>
       ) : null}
